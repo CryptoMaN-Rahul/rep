@@ -10,3 +10,6 @@ rep+ is a lightweight Chrome DevTools extension inspired by Burp Suite's Repeate
 - Supports starring important requests, copying raw request/response blocks, and navigating back/forward through your edit history.
 
 This combo makes rep+ handy for bug bounty hunters and vulnerability researchers who want Burp-like iteration without the heavyweight UI. Install the extension, open DevTools, head to the rep+ panel, and start hacking. 😎
+
+### Demo
+![Image](https://github.com/user-attachments/assets/a4767b2d-9246-4f69-a7cd-a99c05edc78e)
