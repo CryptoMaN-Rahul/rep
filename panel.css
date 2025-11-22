@@ -47,9 +47,16 @@ body {
     margin-bottom: 6px;
 }
 
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
 #search-bar {
     flex: 1;
-    padding: 5px 8px;
+    padding: 5px 35px 5px 8px;
     background: var(--input-bg);
     border: 1px solid var(--border-color);
     color: var(--text-color);
@@ -58,37 +65,34 @@ body {
     font-size: 12px;
 }
 
-.regex-toggle {
+.regex-toggle-inline {
+    position: absolute;
+    right: 4px;
     background: transparent;
-    border: 1px solid var(--border-color);
-    color: #9aa0a6;
+    border: none;
+    color: #5f6368;
     cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 500;
+    padding: 4px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
     transition: all 0.2s;
-    white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 }
 
-.regex-toggle:hover {
+.regex-toggle-inline:hover {
     background: rgba(138, 180, 248, 0.1);
-    border-color: var(--accent-color);
     color: var(--accent-color);
 }
 
-.regex-toggle.active {
+.regex-toggle-inline.active {
     background: rgba(138, 180, 248, 0.2);
-    border-color: var(--accent-color);
     color: var(--accent-color);
 }
 
-.regex-toggle.error {
-    border-color: var(--error-color);
+.regex-toggle-inline.error {
     color: var(--error-color);
     background: rgba(242, 139, 130, 0.1);
 }
