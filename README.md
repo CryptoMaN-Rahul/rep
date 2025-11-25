@@ -110,8 +110,11 @@ If **rep+ saved you time** during testing, development, or bug bounty work, plea
 ---
 
 <h3 align="center">Sponsors</h3>
-
 <p align="center">
+  <a href="https://github.com/projectdiscovery">
+    <img src="https://avatars.githubusercontent.com/u/50994705?s=60" width="60" style="border-radius:50%;" alt="Sponsor"/>
+  </a>
+  &nbsp;&nbsp;
   <a href="https://github.com/Snownin9">
     <img src="https://avatars.githubusercontent.com/u/218675317?s=60" width="60" style="border-radius:50%;" alt="Sponsor"/>
   </a>
@@ -120,8 +123,8 @@ If **rep+ saved you time** during testing, development, or bug bounty work, plea
     <img src="https://avatars.githubusercontent.com/u/50809037?s=60" width="60" style="border-radius:50%;" alt="Sponsor"/>
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/projectdiscovery">
-    <img src="https://avatars.githubusercontent.com/u/50994705?s=60" width="60" style="border-radius:50%;" alt="Sponsor"/>
+  <a href="https://github.com/eduquintanilha">
+    <img src="https://avatars.githubusercontent.com/u/14018253?s=60" width="60" style="border-radius:50%;" alt="Sponsor"/>
   </a>
 </p>
 
