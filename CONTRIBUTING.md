@@ -117,6 +117,17 @@ setupYourFeature(elements);
 4. **Import from specific modules**: Don't create circular dependencies
 5. **Update UI via events**: Emit events instead of directly manipulating DOM from other modules
 
+## Using AI/LLM Assistance
+
+AI can speed you up, but you’re responsible for the code you submit. Please:
+
+1. **Understand the code**: Don’t paste blindly. Read and reason about every change.
+2. **Keep diffs small**: Ask the LLM for focused snippets, not large rewrites.
+3. **Check security & privacy**: No secrets in code; be mindful of optional permissions, data flow, and user prompts.
+4. **Validate logic & side effects**: Ensure event wiring, state updates, and DOM changes make sense; avoid regressions.
+5. **Respect licenses**: Don’t include code with incompatible licenses.
+6. **Test what you touch**: Run or manually verify the affected paths when possible.
+
 ## Module Responsibilities
 
 - **`core/state.js`**: Global application state
