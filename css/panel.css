@@ -22,6 +22,8 @@ body {
     color: var(--text-color);
     height: 100vh;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
     
     /* Smooth theme transition */
     transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
@@ -101,7 +103,8 @@ body.theme-transitioning img {
 
 .container {
     display: flex;
-    height: 100%;
+    flex: 1;
+    min-height: 0; /* allow children to flex/scroll within remaining space */
 }
 
 /* Sidebar */
