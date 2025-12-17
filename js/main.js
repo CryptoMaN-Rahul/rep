@@ -228,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const methodFilterLabel = document.getElementById('method-filter-label');
     const methodFilterMenu = document.getElementById('method-filter-menu');
     const methodItems = methodFilterMenu ? Array.from(methodFilterMenu.querySelectorAll('.method-filter-item')) : [];
+    const starFilterBtn = document.querySelector('.filter-btn[data-filter="starred"]');
 
     const setMethodFilter = (value) => {
         const normalized = value === 'all' ? 'all' : (value || 'all').toUpperCase();
@@ -241,6 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Visual cue on the pill when filter is not "All"
         if (methodFilterBtn) {
             methodFilterBtn.classList.toggle('active', normalized !== 'all');
+        }
+        // Star filter is mutually exclusive with method filter; clear its state
+        if (starFilterBtn) {
+            starFilterBtn.classList.toggle('active', normalized === 'starred');
         }
         filterRequests();
     };
@@ -269,16 +274,26 @@ document.addEventListener('DOMContentLoaded', () => {
         setMethodFilter(state.currentFilter || 'all');
     }
 
-    // Other filter buttons (e.g., starred)
-    document.querySelectorAll('.filter-btn[data-filter]:not(#color-filter-btn)').forEach(btn => {
-        if (btn.id === 'method-filter-btn') return;
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn[data-filter]:not(#color-filter-btn)').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.currentFilter = btn.dataset.filter;
-            filterRequests();
+    // Star filter toggle (mutually exclusive with method filter)
+    if (starFilterBtn) {
+        starFilterBtn.addEventListener('click', () => {
+            const currentlyActive = starFilterBtn.classList.contains('active');
+            if (currentlyActive) {
+                // Clear star filter -> back to All
+                starFilterBtn.classList.remove('active');
+                setMethodFilter('all');
+            } else {
+                // Activate star filter
+                starFilterBtn.classList.add('active');
+                if (methodFilterMenu) methodFilterMenu.classList.remove('open');
+                if (methodItems) methodItems.forEach(item => item.classList.remove('active'));
+                if (methodFilterBtn) methodFilterBtn.classList.remove('active');
+                if (methodFilterLabel) methodFilterLabel.textContent = 'All';
+                state.currentFilter = 'starred';
+                filterRequests();
+            }
         });
-    });
+    }
 
     // Clear All
     if (elements.clearAllBtn) {
