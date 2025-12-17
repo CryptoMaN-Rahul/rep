@@ -854,6 +854,13 @@ export function filterRequests() {
         }
     });
 
+    // Check if any filters are active (for auto-expand logic)
+    const hasActiveFilters = (state.selectedMethods && state.selectedMethods.size > 0) || 
+                             state.starFilterActive || 
+                             state.currentColorFilter !== 'all' || 
+                             state.currentSearchTerm ||
+                             (state.currentFilter !== 'all' && state.currentFilter !== 'starred');
+
     // Update domain groups visibility (third-party domains)
     const domainGroups = requestList.querySelectorAll('.domain-group');
     domainGroups.forEach(group => {
@@ -861,7 +868,7 @@ export function filterRequests() {
         group.style.display = hasVisibleItems ? 'block' : 'none';
 
         // Auto-expand domain groups when filtering (unless manually collapsed)
-        if (hasVisibleItems && !state.manuallyCollapsed && (state.currentFilter !== 'all' || state.currentColorFilter !== 'all' || state.currentSearchTerm)) {
+        if (hasVisibleItems && !state.manuallyCollapsed && hasActiveFilters) {
             group.classList.add('expanded');
             const toggle = group.querySelector('.group-toggle');
             if (toggle) toggle.textContent = '▼';
@@ -875,7 +882,7 @@ export function filterRequests() {
         group.style.display = hasVisibleItems ? 'block' : 'none';
 
         // Auto-expand path group when filtering (unless manually collapsed)
-        if (hasVisibleItems && !state.manuallyCollapsed && (state.currentFilter !== 'all' || state.currentColorFilter !== 'all' || state.currentSearchTerm)) {
+        if (hasVisibleItems && !state.manuallyCollapsed && hasActiveFilters) {
             group.classList.add('expanded');
             const toggle = group.querySelector('.group-toggle');
             if (toggle) toggle.textContent = '▼';
@@ -893,7 +900,7 @@ export function filterRequests() {
         group.style.display = (hasVisibleFirstParty || hasVisibleDomains || hasVisibleAttackSurface) ? 'block' : 'none';
 
         // Auto-expand page groups when filtering (unless manually collapsed)
-        if ((hasVisibleFirstParty || hasVisibleDomains || hasVisibleAttackSurface) && !state.manuallyCollapsed && (state.currentFilter !== 'all' || state.currentColorFilter !== 'all' || state.currentSearchTerm)) {
+        if ((hasVisibleFirstParty || hasVisibleDomains || hasVisibleAttackSurface) && !state.manuallyCollapsed && hasActiveFilters) {
             group.classList.add('expanded');
             const toggleBtn = group.querySelector('.page-toggle-btn');
             if (toggleBtn) toggleBtn.classList.add('expanded');

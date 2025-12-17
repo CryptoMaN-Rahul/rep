@@ -31,9 +31,11 @@ export function toggleStar(request) {
         }
     }
 
-    // Emit event to refresh list while maintaining scroll position
-    const scrollTop = requestList ? requestList.scrollTop : 0;
-    events.emit('request:filtered', { preserveScroll: true, scrollTop });
+    // Only refresh filter if star filter is active, otherwise just update the UI
+    if (state.starFilterActive) {
+        const scrollTop = requestList ? requestList.scrollTop : 0;
+        events.emit('request:filtered', { preserveScroll: true, scrollTop });
+    }
 }
 
 export function toggleGroupStar(type, hostname, btn) {
