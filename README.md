@@ -79,6 +79,9 @@ rep+ is a lightweight Chrome DevTools extension inspired by Burp Suite's Repeate
 ### Extractors & Search
 - Unified Extractor: secrets and endpoints from captured JS.
 - Secret Scanner: entropy + patterns with confidence scores; pagination and domain filter.
+  - Powered by [Kingfisher](https://github.com/mongodb/kingfisher) rules for comprehensive secret detection
+  - Supports AWS, GitHub, Google, Slack, Stripe, Twilio, Azure, and many more service providers
+  - Rules stored locally in `rules/` directory for offline use
 - Endpoint Extractor: full URLs, relative paths, GraphQL; method detection; one-click copy (rebuilds base URL).
 - Response Search: regex support, match preview, pagination, domain filter.
 
@@ -141,6 +144,30 @@ If you use a local model (e.g., Ollama) you must allow Chrome extensions to call
 - **Optional**: `webRequest` + `<all_urls>` only when you enable multi-tab capture.  
 - **Data**: Stored locally; no tracking/analytics.  
 - **AI**: Your API keys stay local; request/response content is sent only to the provider you choose (Claude/Gemini) when you invoke AI features.
+
+## 🔍 Secret Detection with Kingfisher Rules
+
+rep+ uses [Kingfisher](https://github.com/mongodb/kingfisher) rules for secret detection, providing comprehensive coverage of API keys, tokens, and credentials across hundreds of service providers.
+
+### Supported Services
+
+The secret scanner detects secrets from major services including:
+- **Cloud Providers**: AWS, Azure, Google Cloud
+- **Version Control**: GitHub, GitLab
+- **Communication**: Slack, Twilio
+- **Payment**: Stripe, PayPal, Square
+- **And many more...**
+
+### How It Works
+
+1. **Rule Storage**: Kingfisher rules are stored locally in the `rules/` directory
+2. **Auto-Discovery**: Rules are automatically loaded from YAML files
+3. **Pattern Matching**: Uses PCRE-compatible regex patterns with entropy validation
+4. **Validation**: Checks pattern requirements (min digits, uppercase, lowercase, etc.)
+
+### Adding Custom Rules
+
+To add new secret detection rules, see [CONTRIBUTING.md](CONTRIBUTING.md#adding-kingfisher-rules) for detailed instructions.
 
 ## ⚠️ Limitations
 

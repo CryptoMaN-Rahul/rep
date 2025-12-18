@@ -20,5 +20,11 @@
     "devtools_page": "devtools.html",
     "background": {
         "service_worker": "background.js"
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["rules/*"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }

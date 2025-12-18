@@ -1252,7 +1252,7 @@ tr.selected {
     height: 100%;
     width: var(--progress, 0%);
     background: var(--accent-color);
-    transition: width 0.2s;
+    transition: width 0.4s ease-out;
 }
 
 #bulk-progress-text {

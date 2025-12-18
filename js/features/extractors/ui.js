@@ -97,7 +97,7 @@ export function initExtractorUI() {
     if (startScanBtn) {
         startScanBtn.addEventListener('click', async () => {
             extractorProgress.style.display = 'block';
-            extractorProgressBar.style.width = '0%';
+            extractorProgressBar.style.setProperty('--progress', '0%');
             extractorProgressText.textContent = 'Scanning JS files...';
             startScanBtn.disabled = true;
             secretsResults.innerHTML = '';
@@ -115,42 +115,143 @@ export function initExtractorUI() {
 
             try {
                 // Lazy load scanners
-                const [secretScanner, endpointExtractor] = await Promise.all([
+                const [secretScanner, endpointExtractor, stateModule] = await Promise.all([
                     import('./secrets.js'),
-                    import('./endpoints.js')
+                    import('./endpoints.js'),
+                    import('../../core/state.js')
                 ]);
 
-                // Get all resources
-                const resources = await new Promise((resolve) => {
-                    if (chrome.devtools && chrome.devtools.inspectedWindow) {
-                        chrome.devtools.inspectedWindow.getResources((res) => resolve(res));
-                    } else {
-                        resolve([]);
-                    }
+                const { state } = stateModule;
+                
+                if (!state || !state.requests || state.requests.length === 0) {
+                    extractorProgressText.textContent = 'No requests captured yet. Please navigate to a website first.';
+                    setTimeout(() => {
+                        extractorProgress.style.display = 'none';
+                    }, 3000);
+                    return;
+                }
+                
+                // Filter for JavaScript files from captured requests
+                const jsRequests = state.requests.filter(req => {
+                    if (!req || !req.request || !req.response) return false;
+                    const url = req.request.url.toLowerCase();
+                    const mime = req.response?.content?.mimeType?.toLowerCase() || '';
+                    return url.endsWith('.js') || 
+                           mime.includes('javascript') || 
+                           mime.includes('ecmascript') ||
+                           mime.includes('application/javascript');
                 });
 
-                const jsFiles = resources.filter(r => r.type === 'script' || r.url.endsWith('.js') || r.url.endsWith('.map'));
-                let processed = 0;
+                if (jsRequests.length === 0) {
+                    extractorProgressText.textContent = 'No JavaScript files found in captured requests.';
+                    setTimeout(() => {
+                        extractorProgress.style.display = 'none';
+                    }, 3000);
+                    return;
+                }
 
-                for (const file of jsFiles) {
+                // Track progress state
+                let filesProcessed = 0;
+                const totalFiles = jsRequests.length;
+                let lastUpdateTime = 0;
+                const UPDATE_INTERVAL = 50; // Update UI at most every 50ms for smooth animation
+                const scanStartTime = Date.now();
+                const MIN_SCAN_DURATION = 500; // Minimum scan duration to show animation (500ms)
+                
+                // Helper function to update progress bar with throttling
+                const updateProgressBar = (processed, total, foundCount, isComplete = false) => {
+                    const now = Date.now();
+                    if (now - lastUpdateTime < UPDATE_INTERVAL && processed < total && !isComplete) {
+                        return; // Throttle updates (but always show completion)
+                    }
+                    lastUpdateTime = now;
+                    
+                    const percent = Math.round((processed / total) * 100);
+                    
+                    // Use requestAnimationFrame to ensure smooth visual updates
+                    requestAnimationFrame(() => {
+                        // Set CSS variable for progress (the ::after pseudo-element uses this)
+                        extractorProgressBar.style.setProperty('--progress', `${percent}%`);
+                        if (isComplete) {
+                            extractorProgressText.textContent = `Scan complete! Found ${foundCount} secret${foundCount !== 1 ? 's' : ''}`;
+                        } else {
+                            extractorProgressText.textContent = `Scanning ${processed}/${total} files... Found ${foundCount} secret${foundCount !== 1 ? 's' : ''}`;
+                        }
+                    });
+                };
+                
+                // Scan for Secrets using async function that includes Kingfisher rules
+                // onSecretFound callback will render results in real-time as they're discovered
+                const secrets = await secretScanner.scanForSecrets(jsRequests, (processed, total) => {
+                    filesProcessed = processed;
+                    const foundCount = currentSecretResults.length;
+                    updateProgressBar(processed, total, foundCount);
+                }, (secret) => {
+                    // Called immediately when a secret is found
+                    currentSecretResults.push(secret);
+                    
+                    // Reset to first page when new results arrive during scanning
+                    currentSecretsPage = 1;
+                    
+                    // Apply filters if active, otherwise show all
+                    const filtered = filterByDomainAndSearch(currentSecretResults);
+                    
+                    // Re-render with updated results (respecting filters)
+                    renderSecretResults(filtered);
+                    
+                    // Update progress text to show both file progress and secret count
+                    const foundCount = currentSecretResults.length;
+                    updateProgressBar(filesProcessed, totalFiles, foundCount);
+                });
+                
+                // Final progress update - show 100% completion
+                updateProgressBar(totalFiles, totalFiles, currentSecretResults.length, true);
+                
+                // Final results are already in currentSecretResults from the callback
+                // Apply final filter and render
+                const finalFiltered = filterByDomainAndSearch(currentSecretResults);
+                renderSecretResults(finalFiltered);
+                
+                // Ensure minimum scan duration for visibility (especially for fast scans)
+                const scanDuration = Date.now() - scanStartTime;
+                const remainingTime = Math.max(0, MIN_SCAN_DURATION - scanDuration);
+                
+                // Wait to ensure users can see the 100% completion state
+                // This is especially important for fast scans
+                await new Promise(resolve => setTimeout(resolve, remainingTime + 800));
+
+                // Extract Endpoints
+                for (const req of jsRequests) {
                     try {
-                        const content = await new Promise((resolve) => file.getContent(resolve));
+                        // Use stored responseBody if available, otherwise try getContent
+                        let content = null;
+                        
+                        if (req.responseBody !== undefined) {
+                            // Response body was already fetched during capture
+                            content = req.responseBody || '';
+                        } else if (typeof req.getContent === 'function') {
+                            // Fallback: try to get content if it's a DevTools request object
+                            content = await new Promise((resolve, reject) => {
+                                req.getContent((body, encoding) => {
+                                    if (chrome.runtime.lastError) {
+                                        reject(new Error(chrome.runtime.lastError.message));
+                                    } else {
+                                        resolve(body || '');
+                                    }
+                                });
+                            });
+                        } else {
+                            console.warn(`Cannot get content for endpoints from ${req.request.url}: no responseBody or getContent method`);
+                            continue;
+                        }
+                        
                         if (content) {
-                            // Scan for Secrets
-                            const secrets = secretScanner.scanContent(content, file.url);
-                            currentSecretResults.push(...secrets);
-
-                            // Extract Endpoints
-                            const endpoints = endpointExtractor.extractEndpoints(content, file.url);
+                            const endpoints = endpointExtractor.extractEndpoints(content, req.request.url);
                             currentEndpointResults.push(...endpoints);
                         }
                     } catch (e) {
-                        console.error('Error reading file:', file.url, e);
+                        console.error('Error reading file for endpoints:', req.request.url, e);
                     }
-                    processed++;
-                    const percent = Math.round((processed / jsFiles.length) * 100);
-                    extractorProgressBar.style.width = `${percent}%`;
-                    extractorProgressText.textContent = `Scanning ${processed}/${jsFiles.length} files...`;
                 }
 
                 // Render Results
@@ -164,12 +265,15 @@ export function initExtractorUI() {
 
             } catch (e) {
                 console.error('Scan failed:', e);
-                extractorProgressText.textContent = 'Scan failed. Check console.';
+                console.error('Error stack:', e.stack);
+                extractorProgressText.textContent = `Scan failed: ${e.message}. Check console for details.`;
+                extractorProgress.style.display = 'block';
             } finally {
                 startScanBtn.disabled = false;
+                // Hide progress bar after a short delay (we already waited 800ms for completion animation)
                 setTimeout(() => {
                     extractorProgress.style.display = 'none';
-                }, 2000);
+                }, 500);
             }
         });
     }
@@ -222,7 +326,7 @@ export function initExtractorUI() {
                 });
             } else {
                 // Populate from all available requests (before search)
-                const { state } = await import('./state.js');
+                const { state } = await import('../../core/state.js');
                 const seenDomains = new Set();
                 state.requests.forEach(req => {
                     const domain = getDomainFromUrl(req.pageUrl || req.request.url);
@@ -561,7 +665,7 @@ export function initExtractorUI() {
             // Show progress bar if fetching
             if (fetchFresh) {
                 extractorProgress.style.display = 'block';
-                extractorProgressBar.style.width = '0%';
+                extractorProgressBar.style.setProperty('--progress', '0%');
                 extractorProgressText.textContent = 'Preparing requests...';
             }
 
@@ -671,7 +775,7 @@ export function initExtractorUI() {
                     processed++;
                     if (fetchFresh) {
                         const percent = Math.round((processed / requestsToSearch.length) * 100);
-                        extractorProgressBar.style.width = `${percent}%`;
+                        extractorProgressBar.style.setProperty('--progress', `${percent}%`);
                         extractorProgressText.textContent = `Searching ${processed}/${requestsToSearch.length}...`;
                     }
                 }
