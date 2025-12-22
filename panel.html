@@ -42,6 +42,11 @@
                                 d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z" />
                         </svg>
                     </button>
+                    <button id="toggle-sidebar-btn" class="icon-btn" title="Hide sidebar" aria-label="Hide sidebar">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                            <path d="M4 4h4v16H4V4zm5 0h11v2H9V4zm0 6h11v2H9v-2zm0 6h11v2H9v-2z" />
+                        </svg>
+                    </button>
                     <div class="divider-vertical"
                         style="width: 1px; height: 20px; background: var(--border-color); margin: 0 4px;"></div>
                     <button id="settings-btn" class="icon-btn">
@@ -165,6 +170,11 @@
                     <div class="pane-header">
                         <h3>Request</h3>
                         <div class="header-actions">
+                            <button id="show-sidebar-btn" class="icon-btn show-sidebar-btn" title="Show sidebar" aria-label="Show sidebar" style="display: none;">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M3 4h4v16H3V4zm5 0h16v2H8V4zm0 6h16v2H8v-2zm0 6h16v2H8v-2z" />
+                                </svg>
+                            </button>
                             <div class="dropdown-menu-container">
                                 <button id="ai-menu-btn" class="icon-btn" title="AI Actions">
                                     <svg viewBox="0 0 24 24" width="16" height="16">

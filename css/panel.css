@@ -119,6 +119,15 @@ body.theme-transitioning img {
     transition: background-color var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
+/* When sidebar is hidden, let main content take full width */
+.container.sidebar-hidden .sidebar {
+    display: none;
+}
+
+.container.sidebar-hidden .sidebar-resize-handle {
+    display: none;
+}
+
 .sidebar-header {
     padding: 8px;
     border-bottom: 1px solid var(--border-color);
@@ -1371,6 +1380,18 @@ tr.selected {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #9aa0a6;
+}
+
+/* Show Sidebar Button (appears when sidebar is hidden) */
+.show-sidebar-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.container.sidebar-hidden .show-sidebar-btn {
+    display: flex;
 }
 
 /* Header Actions (Request pane) */
